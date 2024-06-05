@@ -35,10 +35,7 @@ const ProductCard = ({ addToCart, isProductAdded }: IAddToCart) => {
       <div className="blockProducts">
         <ul className="flex flex-wrap justify-left m-auto xl:mr-10 xl:ml-10 mt-20">
           {products.map((product: IProduct) => (
-            <li
-              className="xl:w-1/5 lg:w-1/3 md:w-1/3 sm:w-1/2 xs:w-1/2 x-zero:w-full text-white p-0 pr-1px pl-1px itemProduct"
-              key={product.id}
-            >
+            <li className="xl:w-1/5 lg:w-1/3 md:w-1/3 sm:w-1/2 xs:w-1/2 x-zero:w-full text-white p-0 pr-1px pl-1px itemProduct" key={product.id}>
               <div className="h-52 bg-white p-2">
                 <img
                   className="h-full w-full object-contain"
@@ -73,11 +70,6 @@ const ProductCard = ({ addToCart, isProductAdded }: IAddToCart) => {
             </li>
           ))}
         </ul>
-        <img
-          src="src/assets/modal-cart-dummy.svg"
-          className="max-w-60 mb-12"
-          alt="emptyCart"
-        />
       </div>
     </>
   );
