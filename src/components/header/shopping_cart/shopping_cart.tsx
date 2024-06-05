@@ -49,7 +49,7 @@ const ShoppingCart = ({ cart, removeFromItem }: ShoppingCartProps) => {
             : (
               <div className="p-6 w-full flex flex-col items-center overflow-y-scroll">
                 <img
-                  src="/modal-cart-dummy.svg"
+                  src="react-app/modal-cart-dummy.svg"
                   className="max-w-60 mb-12"
                   alt="emptyCart"
                 />
