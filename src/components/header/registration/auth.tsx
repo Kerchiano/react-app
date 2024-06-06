@@ -18,10 +18,24 @@ interface LoginRequestData {
   formType: "login";
 }
 
+type FormErrors = {
+  [key in keyof FormData]?: string;
+};
+
 const Auth = () => {
   const { isOpen, isClosing, openModal, closeModal } = useModal();
-
   useBodyScrollLock(isOpen);
+  const handleCloseModal = () => {
+    closeModal();
+    setFormData((prevData) => ({
+      ...prevData,
+      firstname: "",
+      lastname: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    }));
+  };
 
   const [formData, setFormData] = useState<FormData>({
     firstname: "",
@@ -32,11 +46,14 @@ const Auth = () => {
     formType: "registration",
   });
 
+  const [errors, setErrors] = useState<FormErrors>({});
+
   const toggleFormType = () => {
     setFormData((prevData) => ({
       ...prevData,
       formType: prevData.formType === "registration" ? "login" : "registration",
     }));
+    setErrors({});
   };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
@@ -45,10 +62,38 @@ const Auth = () => {
       ...prevState,
       [name]: value,
     }));
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: "",
+    }));
+  };
+
+  const validate = (): FormErrors => {
+    const newErrors: FormErrors = {};
+    if (formData.formType === "registration") {
+      if (!formData.firstname) newErrors.firstname = "Введите имя";
+      if (!formData.lastname) newErrors.lastname = "Введите фамилию";
+      if (!formData.email) newErrors.email = "Введите email";
+      if (!formData.password) newErrors.password = "Введите пароль";
+      if (formData.password !== formData.confirmPassword)
+        newErrors.confirmPassword = "Пароли не совпадают";
+      if (!formData.confirmPassword)
+        newErrors.confirmPassword = "Подтвердите пароль";
+    } else {
+      if (!formData.email) newErrors.email = "Введите email";
+      if (!formData.password) newErrors.password = "Введите пароль";
+    }
+    return newErrors;
   };
 
   const handleSubmit = (e: FormEvent): void => {
     e.preventDefault();
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
     let requestData: FormData | LoginRequestData;
     if (formData.formType === "registration") {
       requestData = formData;
@@ -59,6 +104,8 @@ const Auth = () => {
         formType: "login",
       };
     }
+
+
     const endpoint =
       formData.formType === "registration"
         ? "https://jsonplaceholder.typicode.com/posts"
@@ -73,11 +120,18 @@ const Auth = () => {
     })
       .then((response) => response.json())
       .then((data) => {
+        handleCloseModal()
         console.log("Данные успешно отправлены:", data);
       })
       .catch((error) => {
         console.error("Ошибка при отправке данных:", error);
       });
+  };
+
+  const inputClassNames = (fieldName: keyof FormData) => {
+    return `border p-2 ${
+      errors[fieldName] ? "border-red-500" : "border-gray-300"
+    }`;
   };
 
   return (
@@ -95,7 +149,7 @@ const Auth = () => {
           }`}
           onClick={(event) => {
             if (event.target === event.currentTarget) {
-              closeModal();
+              handleCloseModal();
             }
           }}
         >
@@ -103,7 +157,7 @@ const Auth = () => {
             <div className="flex justify-end">
               <X
                 className="cursor-pointer text-labelCol hover:text-red-400 transition-colors duration-300"
-                onClick={closeModal}
+                onClick={handleCloseModal}
                 size={24}
               />
             </div>
@@ -115,7 +169,7 @@ const Auth = () => {
                 <>
                   <div className="flex flex-col text-start">
                     <label
-                      className="text-xs mb-1 text-labelCol"
+                      className="text-xs mb-1 mt-3 text-labelCol"
                       htmlFor="firstname"
                     >
                       Имя:
@@ -126,12 +180,17 @@ const Auth = () => {
                       name="firstname"
                       value={formData.firstname}
                       onChange={handleChange}
-                      required
+                      className={inputClassNames("firstname")}
                     />
+                    {errors.firstname && (
+                      <span className="text-red-500 text-xs">
+                        {errors.firstname}
+                      </span>
+                    )}
                   </div>
                   <div className="flex flex-col text-start">
                     <label
-                      className="text-xs mb-1 text-labelCol"
+                      className="text-xs mb-1 mt-3 text-labelCol"
                       htmlFor="lastname"
                     >
                       Фамилия:
@@ -142,12 +201,17 @@ const Auth = () => {
                       name="lastname"
                       value={formData.lastname}
                       onChange={handleChange}
-                      required
+                      className={inputClassNames("lastname")}
                     />
+                    {errors.lastname && (
+                      <span className="text-red-500 text-xs">
+                        {errors.lastname}
+                      </span>
+                    )}
                   </div>
                   <div className="flex flex-col text-start">
                     <label
-                      className="text-xs mb-1 text-labelCol"
+                      className="text-xs mb-1 mt-3 text-labelCol"
                       htmlFor="email"
                     >
                       Email:
@@ -158,12 +222,17 @@ const Auth = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      required
+                      className={inputClassNames("email")}
                     />
+                    {errors.email && (
+                      <span className="text-red-500 text-xs">
+                        {errors.email}
+                      </span>
+                    )}
                   </div>
                   <div className="flex flex-col text-start">
                     <label
-                      className="text-xs mb-1 text-labelCol"
+                      className="text-xs mb-1 mt-3 text-labelCol"
                       htmlFor="password"
                     >
                       Пароль:
@@ -174,12 +243,17 @@ const Auth = () => {
                       name="password"
                       value={formData.password}
                       onChange={handleChange}
-                      required
+                      className={inputClassNames("password")}
                     />
+                    {errors.password && (
+                      <span className="text-red-500 text-xs">
+                        {errors.password}
+                      </span>
+                    )}
                   </div>
                   <div className="flex flex-col text-start">
                     <label
-                      className="text-xs mb-1 text-labelCol"
+                      className="text-xs mb-1 mt-3 text-labelCol"
                       htmlFor="confirmPassword"
                     >
                       Подтверждение пароля:
@@ -190,8 +264,13 @@ const Auth = () => {
                       name="confirmPassword"
                       value={formData.confirmPassword}
                       onChange={handleChange}
-                      required
+                      className={inputClassNames("confirmPassword")}
                     />
+                    {errors.confirmPassword && (
+                      <span className="text-red-500 text-xs">
+                        {errors.confirmPassword}
+                      </span>
+                    )}
                   </div>
                 </>
               )}
@@ -199,7 +278,7 @@ const Auth = () => {
                 <>
                   <div className="flex flex-col text-start">
                     <label
-                      className="text-xs mb-1 text-labelCol"
+                      className="text-xs mb-1 mt-3 text-labelCol"
                       htmlFor="email"
                     >
                       Email:
@@ -210,12 +289,17 @@ const Auth = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      required
+                      className={inputClassNames("email")}
                     />
+                    {errors.email && (
+                      <span className="text-red-500 text-xs">
+                        {errors.email}
+                      </span>
+                    )}
                   </div>
                   <div className="flex flex-col text-start">
                     <label
-                      className="text-xs mb-1 text-labelCol"
+                      className="text-xs mb-1 mt-3 text-labelCol"
                       htmlFor="password"
                     >
                       Пароль:
@@ -226,8 +310,13 @@ const Auth = () => {
                       name="password"
                       value={formData.password}
                       onChange={handleChange}
-                      required
+                      className={inputClassNames("password")}
                     />
+                    {errors.password && (
+                      <span className="text-red-500 text-xs">
+                        {errors.password}
+                      </span>
+                    )}
                   </div>
                 </>
               )}

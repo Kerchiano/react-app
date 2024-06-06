@@ -50,7 +50,6 @@ const ProductCard = ({ addToCart, isProductAdded }: IAddToCart) => {
                 <div className="flex justify-between items-center mb-3">
                   <span>$ {product.price}</span>
                   <div
-                    onClick={() => handleAddToCart(product)}
                     className="transition-all duration-300 rounded cursor-pointer w-8 h-8 hover:bg-slate-500 flex justify-center items-center"
                   >
                     {isProductAdded(product.id) ? (
@@ -61,7 +60,9 @@ const ProductCard = ({ addToCart, isProductAdded }: IAddToCart) => {
                         <CartIcon className="text-green-500" />
                       </div>
                     ) : (
-                      <CartIcon />
+                      <div onClick={() => handleAddToCart(product)}>
+                        <CartIcon />
+                      </div>
                     )}
                   </div>
                 </div>
