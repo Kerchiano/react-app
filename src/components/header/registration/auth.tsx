@@ -35,6 +35,7 @@ const Auth = () => {
       password: "",
       confirmPassword: "",
     }));
+    setErrors({});
   };
 
   const [formData, setFormData] = useState<FormData>({
